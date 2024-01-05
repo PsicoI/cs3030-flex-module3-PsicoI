@@ -61,6 +61,118 @@ Specifically, `tr` can be used to split your text into tokens (words, vowels, co
 ## Sample output
 
 ```
-$ cat somefile.txt | ./ca.sh
+$ cat romeo_and_juliet.txt | ./ca.sh
+Line Count: 5694
+Word Count: 28987
+Consanant Count: 75907
+Vowel Count: 47018
+Punctation Count: 7384
+Digit Count: 148
+Most Frequent Words
+    782 the
+    656 I
+    551 and
+    538 to
+    477 of
+    464 a
+    360 in
+    331 is
+    326 you
+    313 s
+Least Frequent Words
+      1 ACTUAL
+      1 AGREEMENT
+      1 ANYTHING
+      1 AS
+      1 Abate
+      1 About
+      1 Above
+      1 Abraham
+      1 Abram
+      1 Accurs
+```
+
 
 ```
+$ ./ca.sh -f romeo_and_juliet.txt
+Line Count: 5694
+Word Count: 28987
+Consanant Count: 75907
+Vowel Count: 47018
+Punctation Count: 7384
+Digit Count: 148
+Most Frequent Words
+    782 the
+    656 I
+    551 and
+    538 to
+    477 of
+    464 a
+    360 in
+    331 is
+    326 you
+    313 s
+Least Frequent Words
+      1 ACTUAL
+      1 AGREEMENT
+      1 ANYTHING
+      1 AS
+      1 Abate
+      1 About
+      1 Above
+      1 Abraham
+      1 Abram
+      1 Accurs
+```
+
+```
+$ ./ca.sh -f romeo_and_juliet.txt -g 
+Line Count: 5275
+Word Count: 25958
+Consanant Count: 66536
+Vowel Count: 41206
+Punctation Count: 6935
+Digit Count: 0
+Most Frequent Words
+    656 I
+    612 the
+    484 and
+    462 to
+    407 a
+    366 of
+    309 is
+    307 s
+    304 my
+    302 in
+Least Frequent Words
+      1 AND
+      1 Abate
+      1 Above
+      1 Abraham
+      1 Abram
+      1 Accurs
+      1 Acquaint
+      1 Act
+      1 Adding
+      1 Adieu
+```
+
+```
+$ ./ca.sh -u https://www.gutenberg.org/cache/epub/1513/pg1513.txt -g -w -v -W Romeo -t
+Word Count: 25958
+Vowel Count: 41206
+Most Frequent Words
+    656 I
+    612 the
+    484 and
+    462 to
+    407 a
+    366 of
+    309 is
+    307 s
+    304 my
+    302 in
+"Romeo" count: 151
+```
+
+
