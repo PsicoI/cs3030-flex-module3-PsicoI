@@ -44,3 +44,4 @@ tr -cs '[:alnum:]' '[\n*]' < "$input_file_cturek" | tr '[:upper:]' '[:lower:]' |
     echo "Top 10 least frequent words in $input_file_cturek:"
 tr -cs '[:alnum:]' '[\n*]' < "$input_file_cturek" | tr '[:upper:]' '[:lower:]' | sort | uniq -c | sort -n | head -10
 
+# change to test commit with git in kernel
