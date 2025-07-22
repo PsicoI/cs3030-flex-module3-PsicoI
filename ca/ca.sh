@@ -12,44 +12,30 @@ do_least=false # option T
 do_punct=false # option p 
 do_url=false # option u
 do_vowel=false # option v check
+do_wordcount=false
+do_wordsearch=false
+
 url=""
-input_file_cturek="$2" # Input file
-filename="$input_file_cturek"
+filename=""
+search_word=""
 
 
-###
-##
-# Checks to see if required parameters are used
- if [[ -z $1 ]]; then
-        echo -e "No options detected"
-        echo -e "Syntax is <OPTIONS> <input_file>"
-        echo -e "Please use -h for more information."
-        exit 1
-    fi
-
- if [ -z "$input_file_cturek" ]; then
-        echo -e "No file or URL detected: $0 <input_file>\n"
-        echo -e "Syntax is <OPTIONS> <input_file>"
-        echo -e "Please use -h for more information."
-        exit 1
-    fi
-##
 ###
 #~~~~~~~~~~~~~~~~~~~~~~~~~~GET OPTS SECTION~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # defines available options
-optstring=":ahfugwvcpdtTW:"
+optstring=":ahfwvcpdtTW:u:g:w:W:"
 while getopts "$optstring" options; do
     case "$options" in
 # THIS SETS OUTPUTING ALL STATISTICS TO TRUE. The easy button. :)
         a)
             do_all_stats=true
-            filename=$input_file_cturek
+            filename=$OPTARG
         ;;
 # -c Pulls Consonant count statistics
         c)
             do_consonant=true
             echo -e "Consonant count option selected!\n\n"
-        ;;
+        ;;  
 # -d Pulls digit count statistics
         d)
             do_digit=true
@@ -97,7 +83,7 @@ while getopts "$optstring" options; do
 # -u URL input (not specific to gutenberg)
         u)
             do_url=true 
-            url="$input_file_cturek"
+            url="$OPTARG"
             echo "URL: $url"
         ;;
 # -v Pulls all vowel count statistic
@@ -112,26 +98,51 @@ while getopts "$optstring" options; do
 # -f Expects and accepts file input
         f)
 
-            filename=$input_file_cturek
+            filename=$OPTARG
             echo "File: $filename";
             echo "File selected"
 
-            if ! $do_consonant && ! $do_digit && ! $do_most && ! $do_least && ! $do_punct && ! $do_vowel && ! $do_all_stats; then
-                echo -e "No other options detected"
-                echo -e "Syntax is <OPTIONS> <input_file>"
-                echo -e "Please use -h for more information."
-                exit 1
-            fi
+        ;;
+
+        w)
+            do_wordcount=true
+        ;;
+        W)
+            do_wordsearch=true
+            search_word="$OPTARG"
         ;;
 # if option is unknown
-        *) 
+        \?) 
         echo "Unknown option: $1"; exit 1
         ;;
   esac
 done
+
+# checks for file parameter and sets it operand for most flags
+shift $((OPTIND - 1))
+
+# Use OPTARG if set by -f, otherwise use positional argument if present
+if [[ -z "$filename" && -n "$OPTARG" && -f "$OPTARG" ]]; then
+    filename="$OPTARG"
+elif [[ -z "$filename" && -n "$1" && -f "$1" ]]; then
+    filename="$1"
+fi
+
+if [[ -z "$filename" ]]; then
+    echo "No file specified or file does not exist."
+    exit 1
+fi
 #~~~~~~~~~~~~~~~~~~~~~~~~~~END OF GET OPTS SECTION~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 # checks to see if argument options have been combined and flags them as mutually exclusive
+
+
+# If no file/URL flags are set, read from stdin and set do_all_stats
+if [[ -z "$filename" && "$do_url" == false && "$do_gutenberg" == false ]]; then
+    filename=$OPTARG
+    do_all_stats=true
+fi
+
 if [[ "$do_file" == true && ( "$do_url" == true || "$do_gutenberg" == true ) ]]; then
     echo "Options -f, -u, and -g are mutually exclusive."
     exit 1
@@ -142,7 +153,7 @@ fi
         echo "Commencing pull from $url"
 
         # Extract filename from URL (e.g., pg76386.txt)
-        filename=$(basename "$url")
+        filename=$(basename "$url") 
 
             # pulls in text from a Gutenberg project URL
             curl -s "$url" |
@@ -242,5 +253,23 @@ fi
             grep -o -i '[aeiou]' "$filename" | wc -l
             echo -e "\n"
     fi
+
+    # Word count for entire file
+if [[ "$do_wordcount" == true ]]; then
+    echo "Word count in $filename:"
+    wc -w < "$filename"
+    echo
+fi
+
+# Word count for a specific word
+if [[ "$do_wordsearch" == true ]]; then
+    if [[ -z "$search_word" ]]; then
+        echo "No word specified for -W option."
+        exit 1
+    fi
+    echo "Count of '$search_word' in $filename:"
+    grep -o -w -i "$search_word" "$filename" | wc -l
+    echo
+fi
 
 exit 0
