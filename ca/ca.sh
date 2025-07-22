@@ -128,6 +128,32 @@ elif [[ -z "$filename" && -n "$1" && -f "$1" ]]; then
     filename="$1"
 fi
 
+# -g function:
+if [[ $do_gutenberg == true ]]; then
+    echo "Commencing pull from $url"
+    filename=$(basename "$url")
+    curl -s "$url" | awk '/\*\*\* START OF THE PROJECT/ {flag=1; next} /\*\*\* END OF THE PROJECT/ {flag=0} flag' > "$filename"
+    if [[ $? -ne 0 || ! -s "$filename" ]]; then
+        echo "Download failed or file is empty."
+        exit 1
+    fi
+    echo "Saved to $filename"
+    echo -e "\ndone!"
+fi
+
+# -u function
+if [[ $do_url == true ]]; then
+    echo "Commencing pull from $url"
+    filename=$(basename "$url")
+    curl -s "$url" > "$filename"
+    if [[ $? -ne 0 || ! -s "$filename" ]]; then
+        echo "Download failed or file is empty."
+        exit 1
+    fi
+    echo "Saved to $filename"
+    echo -e "\ndone!"
+fi
+
 if [[ -z "$filename" ]]; then
     echo "No file specified or file does not exist."
     exit 1
