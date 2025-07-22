@@ -12,8 +12,8 @@ do_least=false # option T
 do_punct=false # option p 
 do_url=false # option u
 do_vowel=false # option v check
-do_wordcount=false
-do_wordsearch=false
+do_wordcount=false # option w
+do_wordsearch=false  # option W
 
 url=""
 filename=""
@@ -23,14 +23,9 @@ search_word=""
 ###
 #~~~~~~~~~~~~~~~~~~~~~~~~~~GET OPTS SECTION~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # defines available options
-optstring=":ahfwvcpdtTW:u:g:w:W:"
+optstring="ahfwvcpdtTu:g:W:"
 while getopts "$optstring" options; do
-    case "$options" in
-# THIS SETS OUTPUTING ALL STATISTICS TO TRUE. The easy button. :)
-        a)
-            do_all_stats=true
-            filename=$OPTARG
-        ;;
+    case "$options" in 
 # -c Pulls Consonant count statistics
         c)
             do_consonant=true
@@ -111,6 +106,11 @@ while getopts "$optstring" options; do
             do_wordsearch=true
             search_word="$OPTARG"
         ;;
+        # THIS SETS OUTPUTING ALL STATISTICS TO TRUE. The easy button. :)
+        a)
+            do_all_stats=true
+            filename=$OPTARG
+        ;;
 # if option is unknown
         \?) 
         echo "Unknown option: $1"; exit 1
@@ -163,16 +163,36 @@ fi
 # checks to see if argument options have been combined and flags them as mutually exclusive
 
 
-# If no file/URL flags are set, read from stdin and set do_all_stats
-if [[ -z "$filename" && "$do_url" == false && "$do_gutenberg" == false ]]; then
-    filename=$OPTARG
-    do_all_stats=true
-fi
 
+# Checks to make sure that only URL, G-URL, or file is being sent as input
 if [[ "$do_file" == true && ( "$do_url" == true || "$do_gutenberg" == true ) ]]; then
     echo "Options -f, -u, and -g are mutually exclusive."
     exit 1
 fi
+
+# If no stats flags are set, default to all stats
+if [[ "$do_consonant" == false && "$do_digit" == false && "$do_most" == false && "$do_least" == false && "$do_punct" == false && "$do_vowel" == false && "$do_wordcount" == false && "$do_wordsearch" == false ]]; then
+    # If no file/URL flags are set, read from stdin and set do_all_stats
+
+     do_all_stats=true
+fi
+
+    if [[ -z "$filename" && "$do_url" == false && "$do_gutenberg" == false ]]; then
+        filename=$OPTARG
+        do_all_stats=true
+    fi
+
+# -a Sets ALL STATS TRUE
+    if [[ $do_all_stats == true ]]; then
+            do_consonant=true
+            do_digit=true
+            do_most=true
+            do_least=true
+            do_punct=true
+            do_vowel=true
+            do_wordcount=true
+    fi
+
 
 # -g function:
     if [[ $do_gutenberg == true ]]; then
@@ -216,18 +236,6 @@ fi
 
         echo -e "\ndone!"
     fi
-# -a Sets ALL STATS TRUE
-    if [[ $do_all_stats == true ]]; then
-
-        do_consonant=true # option c ||
-        do_digit=true # option d
-        do_most=true # option t ||
-        do_least=true # option T
-        do_punct=true # option p
-        do_vowel=true # option v check
-    fi
-
-
 
 # -c Consonant stat IF STATEMENT
     if [[ $do_consonant == true ]]; then
@@ -268,9 +276,8 @@ fi
     # Top 10 least frequent words and their counts
         echo -e "Top 10 least frequent words in $filename:"
         tr -cs '[:alnum:]' '[\n*]' < "$filename" | tr '[:upper:]' '[:lower:]' | sort | uniq -c | sort -n | head -10
-        echo -e "\ndone!"
+        
 
-        exit 0
     fi
 # -v Vowel stat IF STATEMENT
     if [[ $do_vowel == true ]]; then
@@ -298,4 +305,5 @@ if [[ "$do_wordsearch" == true ]]; then
     echo
 fi
 
+echo -e "\ndone!"
 exit 0
