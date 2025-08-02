@@ -53,7 +53,7 @@ while getopts "$optstring" options; do
         h)  
         echo -e "Welcome to the ca.sh Module 3 program.\n"
             echo -e "This program counts various statistics from a text file or a URL."
-                echo "Please use the following options: "
+                echo -e "Please use the following options: "
                     printf "
                         -a output all statistics. This is the easy button and will use all options except -f and -u
                         -c output the consonant count
@@ -115,8 +115,6 @@ while getopts "$optstring" options; do
             do_file=true
             filename=$OPTARG
             echo "File: $filename";
-            echo "File selected"
-
         ;;
 
         w)
@@ -137,7 +135,7 @@ while getopts "$optstring" options; do
         ;;
   esac
 done
-
+echo
 #~~~~~~~~~~~~~~~~~~~~~~~~~~END OF GET OPTS SECTION~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 
@@ -146,6 +144,7 @@ done
 # checks for file parameter and sets it operand for most flags
 shift $((OPTIND - 1))
 
+# Checks to make sure that the filename and actual file contents are not empty
 if [[ -z "$filename" && -n "$OPTARG" && -f "$OPTARG" ]]; then
     filename="$OPTARG"
 elif [[ -z "$filename" && -n "$1" && -f "$1" ]]; then
@@ -163,33 +162,11 @@ if [[ "$filename" != "/dev/stdin" && $do_url == true && $do_gutenberg == true ]]
         exit 1
     fi
     echo "Saved to $filename"
-    echo -e "\ndone!"
 fi
 
-# Gutenberg logic + URL
-# if [[ "$filename" != "/dev/stdin" && $do_url == true && $do_gutenberg == true ]]; then
-#     if [[ -n "$filename" && -f "$filename" ]]; then
-#         echo "Processing $filename with Gutenberg AWK filter"
-#         tmpfile=$(mktemp)
-#         filename=$(basename "$url")
-#         curl -s "$url" > "$filename"
-#         awk '/\*\*\* START OF THE PROJECT/ {flag=1; next} /\*\*\* END OF THE PROJECT/ {flag=0} flag' "$filename" > "$tmpfile"
-#         if [[ ! -s "$tmpfile" ]]; then
-#             echo "Warning: Gutenberg filter produced no output. File not overwritten."
-#             rm "$tmpfile"
-#         else
-#             mv "$tmpfile" "$filename"
-#             echo "Filtered and saved to $filename"
-#         fi
-#         echo -e "\ndone!"
-#     else
-#         echo "No file specified or file does not exist."
-#         exit 1
-#     fi
-# fi
 
 # Download file if -u is set (and not using stdin)
-if [[ "$filename" != "/dev/stdin" && $do_url == true ]]; then
+if [[ "$filename" != "/dev/stdin" && $do_url == true && $do_gutenberg == false ]]; then
     echo "Commencing pull from $url"
     filename=$(basename "$url")
     curl -s "$url" > "$filename"
@@ -198,7 +175,6 @@ if [[ "$filename" != "/dev/stdin" && $do_url == true ]]; then
         exit 1
     fi
     echo "Saved to $filename"
-    echo -e "\ndone!"
 fi
 
 # Apply Gutenberg filter if requested (after download or file assignment)
@@ -214,7 +190,6 @@ if [[ "$filename" != "/dev/stdin" && $do_gutenberg == true ]]; then
             mv "$tmpfile" "$filename"
             echo "Filtered and saved to $filename"
         fi
-        echo -e "\ndone!"
     else
         echo "No file specified or file does not exist."
         exit 1
@@ -235,7 +210,24 @@ if [[ "$do_file" == true && "$do_gutenberg" == true ]]; then
             mv "$tmpfile" "$filename"
             echo "Filtered and saved to $filename"
         fi
-        echo -e "\ndone!"
+    else
+        echo "No file specified or file does not exist."
+        exit 1
+    fi
+fi
+
+if [[ "$do_file" == true && "$do_gutenberg" == true ]]; then
+    if [[ -n "$filename" && -f "$filename" ]]; then
+        echo "Processing $filename with Gutenberg AWK filter"
+        tmpfile=$(mktemp)
+        awk '/\*\*\* START OF THE PROJECT/ {flag=1; next} /\*\*\* END OF THE PROJECT/ {flag=0} flag' "$filename" > "$tmpfile"
+        if [[ ! -s "$tmpfile" ]]; then
+            echo "Warning: Gutenberg filter produced no output. File not overwritten."
+            rm "$tmpfile"
+        else
+            mv "$tmpfile" "$filename"
+            echo "Filtered and saved to $filename"
+        fi
     else
         echo "No file specified or file does not exist."
         exit 1
@@ -310,6 +302,12 @@ fi
 
     fi
 
+    # Word count for entire file
+    if [[ "$do_wordcount" == true ]]; then
+        echo "Word count in $filename:"
+        wc -w < "$filename"
+    fi
+
 
 # -c Consonant stat IF STATEMENT
     if [[ $do_consonant == true ]]; then
@@ -345,7 +343,6 @@ fi
     
     fi
 
-
 # -t Most used words stat IF STATEMENT
     if [[ $do_most == true ]]; then
         # Top 10 most frequent words and their counts
@@ -363,12 +360,6 @@ fi
 
     fi
 
-# Word count for entire file
-    if [[ "$do_wordcount" == true ]]; then
-        echo "Word count in $filename:"
-        wc -w < "$filename"
-        echo
-    fi
 
 # Word count for a specific word
     if [[ "$do_wordsearch" == true ]]; then
@@ -378,13 +369,7 @@ fi
         fi
         echo "Count of '$search_word' in $filename:"
         grep -o -w -i "$search_word" "$filename" | wc -l
-        echo
     fi
 
 echo -e "\ndone!"
 exit 0
-
-
-
-# TODO: Fix -g not parsing files when -f is used. Try with romeo_and_juliet.txt
-# TODO: Fix 
