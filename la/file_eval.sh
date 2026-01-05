@@ -9,7 +9,7 @@ FILE=${temp}${today}${ext}
 echo $FILE
 
 DATAFOLDER="data"
-# Replace file_name with the target file's name to test.
+# Replace file_name with the target file's name to test. ^_^
 # Operator - The file test operator to use.
 if [ -e $FILE ]
 

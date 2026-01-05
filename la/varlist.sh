@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# This just echos three collected variables gathered from the user
 
 echo "Var one [$1]"
 echo "Var two [$2]"
