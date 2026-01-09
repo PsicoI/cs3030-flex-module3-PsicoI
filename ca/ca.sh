@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author: Cody Turek
-# Date: 2023-10-30
+# Date: 2026-01-05 January 05
 # Description: This script counts various statistics from a text file or a URL.
 
 do_all_stats=false # option a check
@@ -51,18 +51,18 @@ while getopts "$optstring" options; do
         ;;
 # -h Start of help section
         h)  
-        echo -e "Welcome to the ca.sh Module 3 program.\n"
-            echo -e "This program counts various statistics from a text file or a URL."
-                echo -e "Please use the following options: "
+        echo -e "--------------Welcome to Cody's file Stats program--------------"
+            echo -e "This program calculates various statistics from a text file or URL."
+                echo -e "The following are valid options: "
                     printf "
                         -a output all statistics. This is the easy button and will use all options except -f and -u
-                        -c output the consonant count
-                        -d output the digit count
+                        -c output the number of consonants
+                        -d output the number of digits (numbers)
                         -f FILE read from FILE instead of stdin. ***NOTE*** Cannot be combined with -u
-                        -g input is from Project Gutenberg (ignore all lines before the start of the project and after the end of the project)
+                        -g input is from Project Gutenberg (This will ommit all lines before the start of the project and after the end of the project)
                         -h Display a help message
-                        -l counts the number of lines
-                        -p output the punctuation count
+                        -l Counts the number of lines
+                        -p Outputs the punctuation count
                         -t MOST-USED output the top 10 MOST frequently used words and their counts
                         -T LEAST-USED output the top 10 LEAST frequently used words and their counts
                         -u  URL download and read from the file at the given URL. Cannot be combined with -f
@@ -100,7 +100,7 @@ while getopts "$optstring" options; do
             echo "URL: $url"
         ;;
 
-        # -g accepts Gutenberg project URL input out of alphabetical order to allow for -g and -f to have stats defined earlier in the script
+# -g accepts Gutenberg project URL input out of alphabetical order to allow for -g and -f to have stats defined earlier in the script
         g) 
             do_gutenberg=true
         ;;
@@ -124,7 +124,7 @@ while getopts "$optstring" options; do
             do_wordsearch=true
             search_word="$OPTARG"
         ;;
-        # THIS SETS OUTPUTING ALL STATISTICS TO TRUE. The easy button. :)
+# THIS SETS OUTPUTING ALL STATISTICS TO TRUE. The easy button. :)
         a)
             do_all_stats=true
             filename=$OPTARG
@@ -154,9 +154,10 @@ fi
 
 # Only run -u logic if NOT using stdin
 if [[ "$filename" != "/dev/stdin" && $do_url == true && $do_gutenberg == true ]]; then
-    echo "Commencing pull from $url"
     filename=$(basename "$url")
+    echo "Commencing pull from $url"
     curl -s "$url" > "$filename"
+    
     if [[ $? -ne 0 || ! -s "$filename" ]]; then
         echo "Download failed or file is empty."
         exit 1
@@ -167,8 +168,8 @@ fi
 
 # Download file if -u is set (and not using stdin)
 if [[ "$filename" != "/dev/stdin" && $do_url == true && $do_gutenberg == false ]]; then
-    echo "Commencing pull from $url"
     filename=$(basename "$url")
+    echo "Commencing pull from $url"
     curl -s "$url" > "$filename"
     if [[ $? -ne 0 || ! -s "$filename" ]]; then
         echo "Download failed or file is empty."
@@ -180,9 +181,10 @@ fi
 # Apply Gutenberg filter if requested (after download or file assignment)
 if [[ "$filename" != "/dev/stdin" && $do_gutenberg == true ]]; then
     if [[ -n "$filename" && -f "$filename" ]]; then
-        echo "Processing $filename with Gutenberg AWK filter"
         tmpfile=$(mktemp)
+        echo "Processing $filename with Gutenberg AWK filter"
         awk '/\*\*\* START OF THE PROJECT/ {flag=1; next} /\*\*\* END OF THE PROJECT/ {flag=0} flag' "$filename" > "$tmpfile"
+        
         if [[ ! -s "$tmpfile" ]]; then
             echo "Warning: Gutenberg filter produced no output. File not overwritten."
             rm "$tmpfile"
@@ -200,9 +202,10 @@ fi
 # Gutenberg logic + filename
 if [[ "$do_file" == true && "$do_gutenberg" == true ]]; then
     if [[ -n "$filename" && -f "$filename" ]]; then
-        echo "Processing $filename with Gutenberg AWK filter"
         tmpfile=$(mktemp)
+        echo "Processing $filename with Gutenberg AWK filter"
         awk '/\*\*\* START OF THE PROJECT/ {flag=1; next} /\*\*\* END OF THE PROJECT/ {flag=0} flag' "$filename" > "$tmpfile"
+
         if [[ ! -s "$tmpfile" ]]; then
             echo "Warning: Gutenberg filter produced no output. File not overwritten."
             rm "$tmpfile"
@@ -218,9 +221,10 @@ fi
 
 if [[ "$do_file" == true && "$do_gutenberg" == true ]]; then
     if [[ -n "$filename" && -f "$filename" ]]; then
-        echo "Processing $filename with Gutenberg AWK filter"
         tmpfile=$(mktemp)
+        echo "Processing $filename with Gutenberg AWK filter"
         awk '/\*\*\* START OF THE PROJECT/ {flag=1; next} /\*\*\* END OF THE PROJECT/ {flag=0} flag' "$filename" > "$tmpfile"
+
         if [[ ! -s "$tmpfile" ]]; then
             echo "Warning: Gutenberg filter produced no output. File not overwritten."
             rm "$tmpfile"
@@ -233,7 +237,6 @@ if [[ "$do_file" == true && "$do_gutenberg" == true ]]; then
         exit 1
     fi
 fi
-
 
 # Now check for file existence (but skip if using /dev/stdin)
 if [[ "$filename" != "/dev/stdin" && ! -f "$filename" ]]; then
@@ -312,7 +315,7 @@ fi
 # -c Consonant stat IF STATEMENT
     if [[ $do_consonant == true ]]; then
         # Output consonant count (including y)
-            echo -e "Consonant count (including y) in $filename:"
+            echo -e "Consonant count in $filename:"
             grep -o -i '[bcdfghjklmnpqrstvwxyz]' "$filename" | wc -l
     
 

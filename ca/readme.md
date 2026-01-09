@@ -1,4 +1,4 @@
-# Project Gutenberg Stats Counter
+# Project Gutenberg Stats Counter -- complete
 
 In this project you will create a bash script that processes ebook text files from project gutenberg and outputs various statistics about the file.  The script should also work with other text files as well.  The details are described below.
 
@@ -126,7 +126,7 @@ Least Frequent Words
 ```
 
 ```
-$ ./ca.sh -f romeo_and_juliet.txt -g 
+$ cat romeo_and_juliet.txt | ./ca.sh -g 
 Line Count: 5275
 Word Count: 25958
 Consanant Count: 66536
